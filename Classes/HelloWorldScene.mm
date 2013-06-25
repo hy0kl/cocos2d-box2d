@@ -64,20 +64,24 @@
         world->SetContactListener(contactListener);
 
         // Define the static container body, which will provide the collisions at screen borders.
+        /** 创建静态的盒子世界的边界 */
         b2BodyDef containerBodyDef;
         b2Body* containerBody = world->CreateBody(&containerBodyDef);
 
         // for the ground body we'll need these values
         CGSize screenSize = [CCDirector sharedDirector].winSize;
+        /** 单位换算 */
         float widthInMeters = screenSize.width / PTM_RATIO;
         float heightInMeters = screenSize.height / PTM_RATIO;
-        b2Vec2 lowerLeftCorner = b2Vec2(0, 0);
+
+        b2Vec2 lowerLeftCorner  = b2Vec2(0, 0);
         b2Vec2 lowerRightCorner = b2Vec2(widthInMeters, 0);
-        b2Vec2 upperLeftCorner = b2Vec2(0, heightInMeters);
+        b2Vec2 upperLeftCorner  = b2Vec2(0, heightInMeters);
         b2Vec2 upperRightCorner = b2Vec2(widthInMeters, heightInMeters);
 
         // Create the screen box' sides by using a polygon assigning each side individually.
         b2PolygonShape screenBoxShape;
+        /** 密度 */
         int density = 0;
 
         // bottom
@@ -96,25 +100,31 @@
         screenBoxShape.SetAsEdge(upperRightCorner, lowerRightCorner);
         containerBody->CreateFixture(&screenBoxShape, density);
 
+        /** 操作提示 */
         CCLabelTTF* label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
         [self addChild:label];
         [label setColor:ccc3(222, 222, 255)];
         label.position = CGPointMake(screenSize.width / 2, screenSize.height - 50);
 
         // Use the orthogonal tileset for the little boxes
+        /** 使用批量的瓦片地图作为精灵背景 */
         CCSpriteBatchNode* batch = [CCSpriteBatchNode batchNodeWithFile:@"dg_grounds32.png" capacity:TILESET_ROWS * TILESET_COLUMNS];
         [self addChild:batch z:0 tag:kTagBatchNode];
 
         // Add a few objects initially
+        /** 始初化界面上的提示精灵 */
         for (int i = 0; i < 9; i++)
         {
             [self addNewSpriteAt:CGPointMake(screenSize.width / 2, screenSize.height / 2)];
         }
 
+        /** 空中游荡的刚体精妙 */
         [self addSomeJoinedBodies:CGPointMake(screenSize.width / 4, screenSize.height - 50)];
 
+        /** 启动 */
         [self scheduleUpdate];
 
+        /** 开启触控 */
         self.isTouchEnabled = YES;
     }
 
@@ -159,15 +169,28 @@
     fixtureDef.restitution = 0.6f;
     body->CreateFixture(&fixtureDef);
 
+    /** 给刚体加外力 */
+    b2Vec2 vel = body->GetLinearVelocity();
+    float m = body->GetMass();// the mass of the body
+    float t = 1.0f / 60.0f; // the time you set
+    b2Vec2 desiredVel = b2Vec2(CCRANDOM_0_1() * 5, CCRANDOM_0_1() * 5); // the vector speed you set
+    b2Vec2 velChange = desiredVel - vel;
+    //b2Vec2 force = mm * velChange * tt; //f = mv/t
+    b2Vec2 force;
+    force.x = m * velChange.x / t;
+    force.y = m * velChange.y / t;
+    body->ApplyForce(force, body->GetWorldCenter() );
 }
 
 -(void) addSomeJoinedBodies:(CGPoint)pos
 {
     // Create a body definition and set it to be a dynamic body
     b2BodyDef bodyDef;
+    /** 动态刚体 */
     bodyDef.type = b2_dynamicBody;
 
     // position must be converted to meters
+    /** 物理引擎使用的是国际单位制 KMS */
     bodyDef.position = [self toMeters:pos];
     bodyDef.position = bodyDef.position + b2Vec2(-1, -1);
     bodyDef.userData = [self addRandomSpriteAt:pos];
@@ -242,6 +265,7 @@
             // update the sprite's position to where their physics bodies are
             sprite.position = [self toPixels:body->GetPosition()];
             float angle = body->GetAngle();
+            /** 将弧度转为角度 */
             sprite.rotation = CC_RADIANS_TO_DEGREES(angle) * -1;
         }
     }
