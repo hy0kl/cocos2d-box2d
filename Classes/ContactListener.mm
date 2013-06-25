@@ -10,6 +10,7 @@
 #import "ContactListener.h"
 #import "cocos2d.h"
 
+/** 开始接触 */
 void ContactListener::BeginContact(b2Contact* contact)
 {
 	b2Body* bodyA = contact->GetFixtureA()->GetBody();
@@ -24,7 +25,7 @@ void ContactListener::BeginContact(b2Contact* contact)
 	}
 }
 
-
+/** 结束接触 */
 void ContactListener::EndContact(b2Contact* contact)
 {
 	b2Body* bodyA = contact->GetFixtureA()->GetBody();

@@ -1,3 +1,4 @@
+/**
 //
 //  HelloWorldScene.mm
 //  PhysicsBox2d
@@ -5,7 +6,8 @@
 //  Created by Steffen Itterheim on 16.09.10.
 //  Copyright Steffen Itterheim 2010. All rights reserved.
 //
-
+//  improve by hy0kle@gmail.com
+*/
 
 #import "HelloWorldScene.h"
 
@@ -24,7 +26,6 @@
 -(void) addSomeJoinedBodies:(CGPoint)pos;
 -(void) addNewSpriteAt:(CGPoint)p;
 @end
-
 
 @implementation HelloWorld
 
@@ -112,13 +113,13 @@
         [self addChild:batch z:0 tag:kTagBatchNode];
 
         // Add a few objects initially
-        /** 始初化界面上的提示精灵 */
+        /** 始初化界面上的一组精灵 */
         for (int i = 0; i < 9; i++)
         {
             [self addNewSpriteAt:CGPointMake(screenSize.width / 2, screenSize.height / 2)];
         }
 
-        /** 空中游荡的刚体精妙 */
+        /** 空中游荡的刚体精灵 */
         [self addSomeJoinedBodies:CGPointMake(screenSize.width / 4, screenSize.height - 50)];
 
         /** 启动 */
@@ -282,21 +283,21 @@
     return [self locationFromTouch:[touches anyObject]];
 }
 
-//监听首次触发事件
+// 监听首次触发事件
 - (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     CGPoint touchLocation = [self locationFromTouches:touches];
     CCLOG(@"ccTouchesBegan at {x: %f, y: %f}", touchLocation.x, touchLocation.y);
 }
 
-//触摸事件 - 当手指在屏幕上进行移动
+// 触摸事件: 当手指在屏幕上进行移动
 - (void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     CGPoint touchLocation = [self locationFromTouches:touches];
     CCLOG(@"ccTouchesMoved at {x: %f, y: %f}", touchLocation.x, touchLocation.y);
 }
 
-//触摸事件 - 当手指从屏幕抬起时调用的方法
+// 触摸事件: 当手指从屏幕抬起时调用的方法
 -(void) ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     //Add a new body/atlas sprite at the touched location
