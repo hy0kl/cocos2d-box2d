@@ -160,6 +160,7 @@
     // Define another box shape for our dynamic bodies.
     b2PolygonShape dynamicBox;
     float tileInMeters = TILESIZE / PTM_RATIO;
+    /** 设置形状 */
     dynamicBox.SetAsBox(tileInMeters * 0.5f, tileInMeters * 0.5f);
 
     // Define the dynamic body fixture.
@@ -180,7 +181,7 @@
     b2Vec2 force;
     force.x = m * velChange.x / t;
     force.y = m * velChange.y / t;
-    body->ApplyForce(force, body->GetWorldCenter() );
+    body->ApplyForce(force, body->GetWorldCenter());
 }
 
 -(void) addSomeJoinedBodies:(CGPoint)pos
@@ -209,8 +210,17 @@
     b2Body* bodyC = world->CreateBody(&bodyDef);
     [self bodyCreateFixture:bodyC];
 
+    /** 转动关节 */
     b2RevoluteJointDef jointDef;
     jointDef.Initialize(bodyA, bodyB, bodyB->GetWorldCenter());
+    /**
+    // 加入阻尼和限制马达
+    jointDef.lowerAngle = -0.5f * b2_pi; // -90 degrees
+    jointDef.upperAngle = 0.25f * b2_pi; // 45 degrees jointDef.enableLimit = true;
+    jointDef.maxMotorTorque = 10.0f;
+    jointDef.motorSpeed = 0.0f;
+    jointDef.enableMotor = true;
+    */
     bodyA->GetWorld()->CreateJoint(&jointDef);
 
     jointDef.Initialize(bodyB, bodyC, bodyC->GetWorldCenter());
