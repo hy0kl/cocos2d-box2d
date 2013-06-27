@@ -22,6 +22,8 @@ enum
 {
 	b2World* world;
 	ContactListener* contactListener;
+
+    CGPoint startTouch;
 }
 
 // returns a Scene that contains the HelloWorld as the only child

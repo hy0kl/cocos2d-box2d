@@ -127,6 +127,8 @@
 
         /** 开启触控 */
         self.isTouchEnabled = YES;
+
+        startTouch = CGPointZero;
     }
 
     return self;
@@ -155,7 +157,7 @@
     return sprite;
 }
 
--(void) bodyCreateFixture:(b2Body*)body
+-(void) bodyCreateFixture:(b2Body*)body postion:(CGPoint)pos
 {
     // Define another box shape for our dynamic bodies.
     b2PolygonShape dynamicBox;
@@ -171,17 +173,31 @@
     fixtureDef.restitution = 0.6f;
     body->CreateFixture(&fixtureDef);
 
-    /** 给刚体加外力 */
+    /** 给刚体加外力 { */
+    float distance = ccpDistance(pos, startTouch);
+    if (distance < 5)
+    {
+        return;
+    }
+
+    float cos = (pos.x - startTouch.x)/distance;
+    float sin = (pos.y - startTouch.y)/distance;
+    distance /= PTM_RATIO;
+
+    float fix_factor = 1.3;
     b2Vec2 vel = body->GetLinearVelocity();
     float m = body->GetMass();// the mass of the body
     float t = 1.0f / 60.0f; // the time you set
-    b2Vec2 desiredVel = b2Vec2(CCRANDOM_0_1() * 5, CCRANDOM_0_1() * 5); // the vector speed you set
+    b2Vec2 desiredVel = b2Vec2(fix_factor * distance * cos, fix_factor * distance * sin); // the vector speed you set
     b2Vec2 velChange = desiredVel - vel;
-    //b2Vec2 force = mm * velChange * tt; //f = mv/t
+
     b2Vec2 force;
     force.x = m * velChange.x / t;
     force.y = m * velChange.y / t;
+
     body->ApplyForce(force, body->GetWorldCenter());
+    body->SetLinearDamping(0.2f);
+    /** } */
 }
 
 -(void) addSomeJoinedBodies:(CGPoint)pos
@@ -197,18 +213,18 @@
     bodyDef.position = bodyDef.position + b2Vec2(-1, -1);
     bodyDef.userData = [self addRandomSpriteAt:pos];
     b2Body* bodyA = world->CreateBody(&bodyDef);
-    [self bodyCreateFixture:bodyA];
+    [self bodyCreateFixture:bodyA postion:pos];
 
     bodyDef.position = [self toMeters:pos];
     bodyDef.userData = [self addRandomSpriteAt:pos];
     b2Body* bodyB = world->CreateBody(&bodyDef);
-    [self bodyCreateFixture:bodyB];
+    [self bodyCreateFixture:bodyB postion:pos];
 
     bodyDef.position = [self toMeters:pos];
     bodyDef.position = bodyDef.position + b2Vec2(1, 1);
     bodyDef.userData = [self addRandomSpriteAt:pos];
     b2Body* bodyC = world->CreateBody(&bodyDef);
-    [self bodyCreateFixture:bodyC];
+    [self bodyCreateFixture:bodyC postion:pos];
 
     /** 转动关节 */
     b2RevoluteJointDef jointDef;
@@ -247,7 +263,7 @@
     bodyDef.userData = [self addRandomSpriteAt:pos];
     b2Body* body = world->CreateBody(&bodyDef);
 
-    [self bodyCreateFixture:body];
+    [self bodyCreateFixture:body postion:pos];
 }
 
 -(void) update:(ccTime)delta
@@ -297,6 +313,7 @@
 - (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     CGPoint touchLocation = [self locationFromTouches:touches];
+    startTouch = touchLocation;
     CCLOG(@"ccTouchesBegan at {x: %f, y: %f}", touchLocation.x, touchLocation.y);
 }
 
